@@ -1,24 +1,28 @@
 
-chrome.runtime.onMessage.addListener(function(request, sender, sendResponse){
-	if(request.todo == "createHighlightText")
-	{
-		var selection = window.getSelection();
-		var selectedRange = selection.getRangeAt(0);
-		var pathRange = {
-			startContainerPath: getPath(selectedRange.startContainer),
-	        startOffset: selectedRange.startOffset,
-	        endContainerPath: getPath(selectedRange.endContainer),
-	        endOffset: selectedRange.endOffset,
-	        collapsed: selectedRange.collapsed
-	    };
-
+chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
+	if(request.todo == "createHighlightText") {
+        var pathRange = request.pathRange;
 	    var className = "yellow-highlighter";
 		let range = createRangeFromPathRange(pathRange);
         let firstSpan = create(range, className);
         firstSpan.setAttribute("tabindex", "0");
         const closeElm = document.createElement("span");
         firstSpan.appendChild(closeElm);
+        response = !!firstSpan;
 	}
+    else if(request.todo == "getRange") {
+        var selection = window.getSelection();
+        var selectedRange = selection.getRangeAt(0);
+        var pathRange = {
+            startContainerPath: getPath(selectedRange.startContainer),
+            startOffset: selectedRange.startOffset,
+            endContainerPath: getPath(selectedRange.endContainer),
+            endOffset: selectedRange.endOffset,
+            collapsed: selectedRange.collapsed
+        };
+        response = {pathRange: pathRange};
+    }
+    sendResponse(response);
 });
 
 	function getPath(node) {
