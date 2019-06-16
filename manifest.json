@@ -14,19 +14,20 @@
 		"default_title": "HighText"
 	},
 	"background": {
-		"scripts": ["JavaScripts/eventPage.js"],
+		"scripts": ["JavaScripts/eventPage.js", "JavaScripts/store.js"],
 		"persistent": false
 	},
 	"content_scripts": [
 		{
 			"matches": ["<all_urls>"],
-			"js": ["JavaScripts/content.js", "JavaScripts/jquery-3.2.1.min.js"],
+			"js": ["JavaScripts/content.js", "JavaScripts/jquery-3.2.1.min.js", "JavaScripts/loadHighlights.js"],
 			"css": ["StyleSheets/content.css"]
 		}
 	],
 	"permissions": [
 		"tabs",
         "<all_urls>",
-        "contextMenus"
+        "contextMenus",
+        "storage"
 	]
 }
