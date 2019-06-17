@@ -1,5 +1,19 @@
 .yellow-highlighter {
-	background-color: rgb(255, 255, 170);
-    color: rgb(0, 0, 0);
-    box-shadow: rgb(255, 255, 170) 0px 0px 12px;
+	background-color: yellow;
+    box-shadow: yellow;
+}
+
+.cyan-highlighter {
+	background-color: cyan;
+    box-shadow: cyan;
+}
+
+.lime-highlighter {
+	background-color: lime;
+    box-shadow: lime;
+}
+
+.magenta-highlighter {
+	background-color: magenta;
+    box-shadow: magenta;
 }

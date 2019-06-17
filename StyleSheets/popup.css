@@ -1,0 +1,35 @@
+#popup {
+    padding: 4px 6px;
+}
+
+#current-color {
+	position: relative;
+	top: 5px;
+}
+
+.rectangle {
+    display: block;
+    color: white;
+    height: 32px;
+    background-color: #efa83a;
+    border: none;
+    width: 150px;
+    text-align: center;
+    margin-bottom: 4px;
+    text-transform: uppercase;
+    font-weight: bold;
+    font-size: 14px;
+    border-radius: 3px;
+}
+
+button {
+    cursor: pointer;
+}
+
+button:hover {
+    background-color: black;
+}
+
+button:last-of-type {
+    margin-bottom: 0;
+}
