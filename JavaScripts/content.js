@@ -1,10 +1,15 @@
 init();
 
 function init() {
+    showAllHighlights();
+    messageListner();
+}
+
+function messageListner() {
     chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         var response;
         if(request.todo == "createHighlightText") {
-            response = createHighlightText(request.pathRange);
+            response = createHighlightText(request.pathRange, request.color);
         }
         else if(request.todo == "getRange") {
             response = getRange();
@@ -26,8 +31,8 @@ function getRange() {
     return pathRange;
 }
 
-function createHighlightText(pathRange) {
-    var className = "yellow-highlighter";
+function createHighlightText(pathRange, color) {
+    var className = color+"-highlighter";
     let range = createRangeFromPathRange(pathRange);
     let firstSpan = create(range, className);
     firstSpan.setAttribute("tabindex", "0");
@@ -213,5 +218,5 @@ function doCreate(range, record, createWrapper) {
 }
 
 function showAllHighlights() {
-    chrome.runtime.sendMessage({todo: "showALlHighlighters"});
+    chrome.runtime.sendMessage({todo: "showAllHighlights"});
 }

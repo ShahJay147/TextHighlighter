@@ -4,39 +4,60 @@ var chrome_tabs;
 init();
 
 function init() {
+	chrome_tabs = chrome.tabs;
+
+	menuItemForContextMenus();
+	onClickOfContextMenus();
+
+	messageListner();
+}
+
+function menuItemForContextMenus() {
 	menuItem = {
 		"id": "highlighter",
 		"title": "Highlighter",
 		"contexts": ["selection"]
-	}
-
-	chrome_tabs = chrome.tabs;
-
+	};
 	chrome.contextMenus.create(menuItem);
+}
 
+function onClickOfContextMenus() {
 	chrome.contextMenus.onClicked.addListener(function(clickData) {
 		if(clickData.menuItemId == "highlighter" && clickData.selectionText) {
 			createNewHighlight();
 		}
-	})
+	});
+}
 
+function messageListner() {
 	chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
-		if (request.todo == "showALlHighlighters") {
+		if (request.todo == "showAllHighlights") {
 			getTab().then(function(tab) {
 				var tab_url = tab.url;
 				createAllHighlights(tab_url);
-			});	
+			});
 		}
-	})
+		else if(request.todo == "removeAllHighlights") {
+			getTab().then(function(tab) {
+				var tab_url = tab.url;
+				clearPage(tab_url);
+			});
+		}
+		else if(request.todo == "changeColor") {
+			changeColor(request.color);
+		}
+	});
 }
 
 function createNewHighlight() {
-	getRange().then(function(pathRange) {
-		getTab().then(function(tab) {
-			var tab_url = tab.url;
-			storeHighlight(tab_url, pathRange);
+	getColor().then(function(color) {
+		getRange().then(function(pathRange) {
+			getTab().then(function(tab) {
+				var tab_url = tab.url;
+				storeHighlight(tab_url, pathRange, color);
+			})
+			createHighlight(pathRange, color);
 		})
-		createHighlight(pathRange);
 	});
 }
 
@@ -44,14 +65,15 @@ function getRange() {
 	return sendMessage({todo: "getRange"});
 }
 
-function createHighlight(pathRange) {
-	return sendMessage({todo: "createHighlightText", pathRange: pathRange});
+function createHighlight(pathRange, color) {
+	return sendMessage({todo: "createHighlightText", pathRange: pathRange, color: color});
 }
 
 function createAllHighlights(tab_url) {
 	getAllHighligths(tab_url).then(function (highlights) {
 		for (var i = 0; highlights && i < highlights.length; i++) {
-		    createHighlight(highlights[i].pathRange);
+			var current_highlight = highlights[i];
+		    createHighlight(current_highlight.pathRange, current_highlight.color);
 		}
 	})
 }
@@ -68,7 +90,7 @@ function sendMessage(message) {
 	            resolve(response);
 			})
 		})
-	})
+	});
 }
 
 function getTab() {

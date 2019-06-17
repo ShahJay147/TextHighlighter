@@ -3,27 +3,31 @@
 	"name": "Text HighLigher",
 	"version": "1.0",
 
-	"description": "Highlighter Text Extension!!",
+	"description": "Text Highlighter Extension!!",
 	"icons": {
 		"100": "icon100.png",
 		"50": "icon50.png"
 	},
-	"page_action":{
+
+	"browser_action":{
 		"default_icon": "icon50.png",
 		"default_popup": "popup.html",
-		"default_title": "HighText"
+		"default_title": "HighlightText"
 	},
+
 	"background": {
 		"scripts": ["JavaScripts/eventPage.js", "JavaScripts/store.js"],
 		"persistent": false
 	},
+
 	"content_scripts": [
 		{
 			"matches": ["<all_urls>"],
-			"js": ["JavaScripts/content.js", "JavaScripts/jquery-3.2.1.min.js", "JavaScripts/loadHighlights.js"],
+			"js": ["JavaScripts/content.js", "JavaScripts/jquery-3.2.1.min.js"],
 			"css": ["StyleSheets/content.css"]
 		}
 	],
+
 	"permissions": [
 		"tabs",
         "<all_urls>",
