@@ -11,6 +11,7 @@ function init() {
 	messageListner();
 }
 
+// This will set menu item for context menus
 function menuItemForContextMenus() {
 	menuItem = {
 		"id": "highlighter",
@@ -20,6 +21,7 @@ function menuItemForContextMenus() {
 	chrome.contextMenus.create(menuItem);
 }
 
+// This will call when someone click in context menus
 function onClickOfContextMenus() {
 	chrome.contextMenus.onClicked.addListener(function(clickData) {
 		if(clickData.menuItemId == "highlighter" && clickData.selectionText) {
@@ -28,6 +30,7 @@ function onClickOfContextMenus() {
 	});
 }
 
+// This will useful to listen messages from content scripts and popup scripts.
 function messageListner() {
 	chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
 		if (request.todo == "showAllHighlights") {
@@ -49,6 +52,7 @@ function messageListner() {
 	});
 }
 
+// Useful to create new highlight
 function createNewHighlight() {
 	getColor().then(function(color) {
 		getRange().then(function(response) {
@@ -70,6 +74,7 @@ function createHighlight(pathRange, color, id) {
 	return sendMessage({todo: "createHighlightText", pathRange: pathRange, color: color, id: id});
 }
 
+// all previously store highlights will be created when page reopens
 function createAllHighlights(tab_url) {
 	getAllHighligths(tab_url).then(function (highlights) {
 		for (var i = 0; highlights && i < highlights.length; i++) {
@@ -79,6 +84,7 @@ function createAllHighlights(tab_url) {
 	})
 }
 
+// when someone click on clear all highlights from popup all highlights would be clear
 function deleteAllHighlights(tab_url) {
 	getAllHighligths(tab_url).then(function (highlights) {
 		for (var i = 0; highlights && i < highlights.length; i++) {
@@ -92,6 +98,7 @@ function deleteHighlight(id) {
 	sendMessage({todo: 'removeHighlight', id: id});
 }
 
+// This will be useful to sendmessage to content script
 function sendMessage(message) {
 	return new Promise((resolve, reject) => {
 		getTab().then(function(tab) {

@@ -5,6 +5,7 @@ function init() {
     messageListner();
 }
 
+// useful to listen messages from background scripts
 function messageListner() {
     chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         var response;
@@ -21,6 +22,7 @@ function messageListner() {
     });
 }
 
+// get range of currently selected part
 function getRange() {
     var selection = window.getSelection();
     var selectedRange = selection.getRangeAt(0);
@@ -35,9 +37,12 @@ function getRange() {
     return {pathRange: pathRange, id: id};
 }
 
+// creating a new highlight
 function createHighlightText(pathRange, color, id) {
     var className = color+"-highlighter";
+    console.log(pathRange);
     let range = createRangeFromPathRange(pathRange);
+    console.log(range);
     let firstSpan = create(range, className, id);
     firstSpan.setAttribute("tabindex", "0");
     const closeElm = document.createElement("span");
@@ -45,6 +50,7 @@ function createHighlightText(pathRange, color, id) {
     return !!firstSpan;
 }
 
+// get the Path of a node within its hierarchy
 function getPath(node) {
     let tests = []
     for (;
@@ -91,6 +97,7 @@ function getPath(node) {
     return tests.length === 0 ? "" : `/${tests.join('/')}`
 };
 
+// for creating random id
 function createRandomId() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c, index) {
         var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
@@ -101,6 +108,7 @@ function createRandomId() {
     });
 }
 
+// create a standard Range() object, given pathrange
 function createRangeFromPathRange(pathRange) {
     var startContainer, endContainer, endOffset, evaluator = new XPathEvaluator();
     startContainer = evaluator.evaluate(pathRange.startContainerPath,
@@ -128,6 +136,7 @@ function createRangeFromPathRange(pathRange) {
     return range;
 };
 
+// adding a highlight, by wrapping a range in a span
 function create(range, className, id) {
     var span = document.createElement("SPAN");
     span.className = className;
@@ -232,6 +241,7 @@ function doCreate(range, record, createWrapper) {
     } while (!done);
 }
 
+// delete a highlight
 function removeHighlight(id) {
     var span = document.getElementById(id);
 
@@ -255,6 +265,7 @@ function removeHighlight(id) {
     return true;
 }
 
+// merge text nodes with its siblings
 function merge(n) {
     if (n.nodeType === Node.TEXT_NODE) {
         if (n.nextSibling && n.nextSibling.nodeType === Node.TEXT_NODE) {
@@ -275,6 +286,7 @@ function isHighlightSpan(node) {
         node.firstSpan !== undefined;
 }
 
+// show all highlights when reloading a page
 function showAllHighlights() {
     chrome.runtime.sendMessage({todo: "showAllHighlights"});
 }
