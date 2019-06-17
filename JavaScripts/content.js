@@ -9,10 +9,13 @@ function messageListner() {
     chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         var response;
         if(request.todo == "createHighlightText") {
-            response = createHighlightText(request.pathRange, request.color);
+            response = createHighlightText(request.pathRange, request.color, request.id);
         }
         else if(request.todo == "getRange") {
             response = getRange();
+        }
+        else if(request.todo == "removeHighlight") {
+            response = removeHighlight(request.id);
         }
         sendResponse(response);
     });
@@ -28,13 +31,14 @@ function getRange() {
         endOffset: selectedRange.endOffset,
         collapsed: selectedRange.collapsed
     };
-    return pathRange;
+    var id = createRandomId();
+    return {pathRange: pathRange, id: id};
 }
 
-function createHighlightText(pathRange, color) {
+function createHighlightText(pathRange, color, id) {
     var className = color+"-highlighter";
     let range = createRangeFromPathRange(pathRange);
-    let firstSpan = create(range, className);
+    let firstSpan = create(range, className, id);
     firstSpan.setAttribute("tabindex", "0");
     const closeElm = document.createElement("span");
     firstSpan.appendChild(closeElm);
@@ -87,6 +91,16 @@ function getPath(node) {
     return tests.length === 0 ? "" : `/${tests.join('/')}`
 };
 
+function createRandomId() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c, index) {
+        var r = Math.random() * 16 | 0, v = c == 'x' ? r : (r & 0x3 | 0x8);
+        if (index === 0) {
+            v = (v % 6) + 0xa;
+        }
+        return v.toString(16);
+    });
+}
+
 function createRangeFromPathRange(pathRange) {
     var startContainer, endContainer, endOffset, evaluator = new XPathEvaluator();
     startContainer = evaluator.evaluate(pathRange.startContainerPath,
@@ -114,7 +128,7 @@ function createRangeFromPathRange(pathRange) {
     return range;
 };
 
-function create(range, className) {
+function create(range, className, id) {
     var span = document.createElement("SPAN");
     span.className = className;
     var record = {
@@ -126,6 +140,7 @@ function create(range, className) {
         var newSpan = span.cloneNode(false);
         if (!record.firstSpan) {
             record.firstSpan = newSpan;
+            record.firstSpan.id = id;
         }
         if (record.lastSpan) {
             record.lastSpan.nextSpan = newSpan;
@@ -215,6 +230,49 @@ function doCreate(range, record, createWrapper) {
             dirIsLeaf = false;
         }
     } while (!done);
+}
+
+function removeHighlight(id) {
+    var span = document.getElementById(id);
+
+    if (!this.isHighlightSpan(span)) {
+        return false;
+    }
+
+    while (this.isHighlightSpan(span)) {
+        while (span.hasChildNodes()) {
+            var nodeNew = span.parentNode.insertBefore(span.firstChild, span);
+            merge(nodeNew);
+        }
+
+        var nodeRemovedPreviousSibling = span.previousSibling;
+        var nodeRemoved = span.parentNode.removeChild(span);
+        if (nodeRemovedPreviousSibling) {
+            merge(nodeRemovedPreviousSibling);
+        }
+        span = nodeRemoved.nextSpan;
+    }
+    return true;
+}
+
+function merge(n) {
+    if (n.nodeType === Node.TEXT_NODE) {
+        if (n.nextSibling && n.nextSibling.nodeType === Node.TEXT_NODE) {
+            n.textContent += n.nextSibling.textContent;
+            n.nextSibling.parentNode.removeChild(n.nextSibling);
+        }
+
+        if (n.previousSibling && n.previousSibling.nodeType === Node.TEXT_NODE) {
+            n.previousSibling.textContent += n.textContent;
+            n.parentNode.removeChild(n);
+        }
+    }
+}
+
+function isHighlightSpan(node) {
+    return node &&
+        node.nodeType === Node.ELEMENT_NODE && node.nodeName === "SPAN" &&
+        node.firstSpan !== undefined;
 }
 
 function showAllHighlights() {

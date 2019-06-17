@@ -1,5 +1,4 @@
-var menuItem;
-var chrome_tabs;
+var menuItem, chrome_tabs;
 
 init();
 
@@ -40,6 +39,7 @@ function messageListner() {
 		else if(request.todo == "removeAllHighlights") {
 			getTab().then(function(tab) {
 				var tab_url = tab.url;
+				deleteAllHighlights(tab_url);
 				clearPage(tab_url);
 			});
 		}
@@ -51,12 +51,13 @@ function messageListner() {
 
 function createNewHighlight() {
 	getColor().then(function(color) {
-		getRange().then(function(pathRange) {
+		getRange().then(function(response) {
+			var pathRange = response.pathRange, id = response.id;
 			getTab().then(function(tab) {
 				var tab_url = tab.url;
-				storeHighlight(tab_url, pathRange, color);
+				storeHighlight(tab_url, pathRange, id, color);
 			})
-			createHighlight(pathRange, color);
+			createHighlight(pathRange, color, id);
 		})
 	});
 }
@@ -65,17 +66,30 @@ function getRange() {
 	return sendMessage({todo: "getRange"});
 }
 
-function createHighlight(pathRange, color) {
-	return sendMessage({todo: "createHighlightText", pathRange: pathRange, color: color});
+function createHighlight(pathRange, color, id) {
+	return sendMessage({todo: "createHighlightText", pathRange: pathRange, color: color, id: id});
 }
 
 function createAllHighlights(tab_url) {
 	getAllHighligths(tab_url).then(function (highlights) {
 		for (var i = 0; highlights && i < highlights.length; i++) {
 			var current_highlight = highlights[i];
-		    createHighlight(current_highlight.pathRange, current_highlight.color);
+		    createHighlight(current_highlight.pathRange, current_highlight.color, current_highlight.id);
 		}
 	})
+}
+
+function deleteAllHighlights(tab_url) {
+	getAllHighligths(tab_url).then(function (highlights) {
+		for (var i = 0; highlights && i < highlights.length; i++) {
+			var current_highlight = highlights[i];
+		    deleteHighlight(current_highlight.id);
+		}
+	})
+}
+
+function deleteHighlight(id) {
+	sendMessage({todo: 'removeHighlight', id: id});
 }
 
 function sendMessage(message) {

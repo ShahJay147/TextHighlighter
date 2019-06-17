@@ -31,7 +31,6 @@ function getAndSetColor() {
 function changeColor(color) {
 	$('#'+color+'-color').click(function() {
 		sendMessageToBackground({todo: "changeColor", color: color});
-		console.log(color);
 		setCurrentColor(color);
 	});
 }

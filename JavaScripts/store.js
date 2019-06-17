@@ -1,4 +1,4 @@
-function storeHighlight(tab_url, pathRange, color) {
+function storeHighlight(tab_url, pathRange, id, color) {
 	chrome.storage.local.get({highlights: {}}, (result) => {
         var highlights = result.highlights;
 
@@ -7,7 +7,8 @@ function storeHighlight(tab_url, pathRange, color) {
 
         highlights[tab_url].push({
         	pathRange: pathRange,
-            color: color
+            color: color,
+            id: id
         });
         chrome.storage.local.set({highlights});
     });
